@@ -179,7 +179,7 @@ class GridStore {
 	}
 
 	toString() {
-		return 'awer';
+		return 'TODO: unimplemented';
 	}
 }
 

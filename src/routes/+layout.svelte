@@ -9,9 +9,16 @@
 	import '../app.css';
 	let { children } = $props();
 
+	import { dev } from '$app/environment';
+	import { RenderScan } from 'svelte-render-scan';
+
 	setGrid();
 	setTool();
 </script>
+
+{#if dev}
+	<!-- <RenderScan /> -->
+{/if}
 
 <main class="dark flex h-screen w-screen bg-background/80">
 	<div class="flex min-w-64 flex-col gap-4 p-4">

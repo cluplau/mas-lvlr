@@ -27,7 +27,6 @@
 		reader.onload = () => {
 			const level = reader.result?.toString() ?? '';
 			store.fromLevel(level);
-			console.log('Uploaded grid');
 		};
 		reader.readAsText(file);
 	}
@@ -41,7 +40,6 @@
 		a.download = 'grid.lvl';
 		a.click();
 		URL.revokeObjectURL(url);
-		console.log('Download triggered');
 	}
 
 	async function copyGrid() {
@@ -53,7 +51,6 @@
 			copyTimeout = setTimeout(() => {
 				copied = false;
 			}, 2000);
-			console.log('Copied to clipboard');
 		} catch (err) {
 			console.error('Failed to copy:', err);
 		}

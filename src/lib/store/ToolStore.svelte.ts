@@ -1,4 +1,4 @@
-import { getContext, setContext } from 'svelte';
+import { getContext, setContext, tick } from 'svelte';
 import { type CellVariant, type Color } from './cell';
 
 const TOOL_KEY = 'tool';
@@ -25,6 +25,10 @@ class ToolStore {
 	setColor(color: Color) {
 		this.color = color;
 		localStorage.setItem(COLOR_KEY, color);
+	}
+
+	setIsDragging(val: boolean) {
+		this.isDragging = val;
 	}
 }
 

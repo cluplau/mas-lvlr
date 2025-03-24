@@ -15,13 +15,17 @@
 
 	function entityDragstartHandler(ev: DragEvent) {
 		if (!ev?.dataTransfer) return;
-		tool.isDragging = true;
+		tool.setIsDragging(true);
 		ev.dataTransfer.setData('entity', JSON.stringify({ row, col }));
 		ev.stopPropagation();
 	}
 
 	function entityDragendHandler(ev: DragEvent) {
-		tool.isDragging = false;
+		tool.setIsDragging(false);
+	}
+
+	function stopProp(e: Event) {
+		e.stopImmediatePropagation();
 	}
 </script>
 
@@ -31,8 +35,8 @@
 		class="entity agent"
 		style={`--entity-color: ${toCSSColor(cell.entity.color)}`}
 		draggable="true"
-		onmousedown={() => (tool.isDragging = true)}
-		onmouseup={() => (tool.isDragging = false)}
+		onmousedown={stopProp}
+		onmouseup={() => tool.setIsDragging(false)}
 		ondragstart={entityDragstartHandler}
 		ondragendcapture={entityDragendHandler}
 	>

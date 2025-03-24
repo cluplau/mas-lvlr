@@ -37,7 +37,9 @@
 	}
 
 	function cellMouseOverHandler(ev: MouseEvent) {
-		paintCell(ev);
+		if (tool.tool != CellVariant.AgentGoal && tool.tool != CellVariant.BoxGoal) {
+			paintCell(ev);
+		}
 	}
 
 	function dragoverHandler(ev: DragEvent) {
