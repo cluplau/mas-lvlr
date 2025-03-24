@@ -76,3 +76,47 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+
+.cell {
+  aspect-ratio: 1 / 1;
+  user-select: none;
+  container-type: size;
+  position: relative;
+}
+
+.entity {
+  cursor: pointer;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60cqmin;
+  font-weight: bold;
+}
+
+.entity.box,
+.entity.agent {
+  inset: 14%;
+  width: 72%;
+  height: 72%;
+}
+
+.entity.boxgoal,
+.entity.agentgoal {
+  inset: 7%;
+  width: 86%;
+  height: 86%;
+  background-color: #dfdf02;
+}
+
+.entity.agent,
+.entity.agentgoal {
+  border-radius: 100%;
+  clip-path: circle(50%);
+}
+
+.entity.box,
+.entity.agent {
+  background-color: var(--entity-color);
+}

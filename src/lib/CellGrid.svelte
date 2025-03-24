@@ -5,18 +5,17 @@
 	const store = getGrid();
 </script>
 
-<div class="flex h-full items-center justify-center">
-	<section
-		class="grid aspect-square h-full max-h-[90vh] gap-[1px] bg-black"
-		style={`
-      grid-template-rows: repeat(${store.height}, 1fr); 
-      grid-template-columns: repeat(${store.width}, 1fr);
+<section
+	class="ml-auto grid max-h-full gap-[1px]"
+	style={`
+      grid-template-rows: repeat(${store.height}, minmax(0, 1fr)); 
+      grid-template-columns: repeat(${store.width}, minmax(0, 1fr));
+      aspect-ratio: ${store.width} / ${store.height}
       `}
-	>
-		{#each store.grid as row}
-			{#each row as cell}
-				<Cell {cell} />
-			{/each}
+>
+	{#each store.grid as grid_row, row}
+		{#each grid_row as cell, col (cell.id)}
+			<Cell {cell} {row} {col} />
 		{/each}
-	</section>
-</div>
+	{/each}
+</section>

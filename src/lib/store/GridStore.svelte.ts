@@ -1,32 +1,22 @@
 import {
-	CellType,
+	CellVariant,
 	EntityType,
-	type Agent,
-	type Box,
+	canHaveEntity,
+	type EntityAgent,
+	type EntityBox,
 	type Cell,
 	type Color,
-	type FreeCell
-} from '$lib/cell';
+	type CellFree,
+	type CellWall,
+	type CellEmpty,
+	type CellBoxGoal,
+	type CellAgentGoal
+} from '$lib/store/cell';
 import { getContext, setContext } from 'svelte';
 
-export function hasEntity(cell: Cell) {
-	return cell.type === 'free' || cell.type === 'goal';
-}
-
-export function isAgent(entity: Agent | Box) {
-	return entity.type == 'agent';
-}
-export function isBox(entity: Agent | Box) {
-	return entity.type == 'box';
-}
-
-export function isGoal(cell: Cell) {
-	return cell.type === 'goal';
-}
-
 class GridStore {
-	width: number = 3;
-	height: number = 3;
+	width: number = $state(0);
+	height: number = $state(0);
 	grid: Cell[][] = $state([[]]);
 
 	constructor(width: number, height: number, grid: Cell[][]) {
@@ -35,18 +25,102 @@ class GridStore {
 		this.grid = grid;
 	}
 
-	getCell(row: number, col: number): Cell | undefined {
-		if (row >= 0 && row < this.height && col >= 0 && col < this.width) {
-			return this.grid[row][col];
+	addRow() {
+		const newRow: Cell[] = Array(this.width)
+			.fill(null)
+			.map((_, x) => ({
+				type: CellVariant.Free,
+				id: `${this.height}-${x}`
+			}));
+
+		this.grid.push(newRow);
+		this.height++;
+	}
+
+	removeRow() {
+		if (this.height > 3) {
+			this.grid.pop();
+			this.height--;
 		}
+	}
+
+	addColumn() {
+		this.grid.forEach((row, y) => {
+			const newCell: Cell = {
+				type: CellVariant.Free,
+				id: `${y}-${this.width}`
+			};
+			row.push(newCell);
+		});
+		this.width++;
+	}
+
+	removeColumn() {
+		if (this.width > 3) {
+			this.grid.forEach((row) => row.pop());
+			this.width--;
+		}
+	}
+
+	getCell(row: number, col: number): Cell | undefined {
+		const cell = this.grid[row][col];
+
+		if (cell) {
+			return cell;
+		}
+
 		return undefined;
 	}
 
-	addEntity(row: number, col: number, entity: Agent | Box): boolean {
+	setCell(row: number, col: number, type: CellVariant): Cell | undefined {
+		let cell = this.getCell(row, col);
+		if (!cell) {
+			return;
+		}
+
+		if (type === CellVariant.Wall && !this.hasEntity(row, col)) {
+			this.grid[row][col] = { id: cell.id, type: CellVariant.Wall } satisfies CellWall;
+			return;
+		}
+		if (type === CellVariant.Empty && !this.hasEntity(row, col)) {
+			this.grid[row][col] = { id: cell.id, type: CellVariant.Empty } satisfies CellEmpty;
+			return;
+		}
+
+		if (type === CellVariant.Free) {
+			this.grid[row][col] = {
+				id: cell.id,
+				type: CellVariant.Free,
+				entity: canHaveEntity(cell) ? cell.entity : undefined
+			} satisfies CellFree;
+			return;
+		}
+
+		if (type === CellVariant.BoxGoal && canHaveEntity(cell)) {
+			this.grid[row][col] = {
+				id: cell.id,
+				type: CellVariant.BoxGoal,
+				goalFor: 'A',
+				entity: canHaveEntity(cell) ? cell.entity : undefined
+			} satisfies CellBoxGoal;
+			return;
+		}
+		if (type === CellVariant.AgentGoal && canHaveEntity(cell)) {
+			this.grid[row][col] = {
+				id: cell.id,
+				type: CellVariant.AgentGoal,
+				goalFor: '0',
+				entity: canHaveEntity(cell) ? cell.entity : undefined
+			} satisfies CellAgentGoal;
+			return;
+		}
+	}
+
+	addEntity(row: number, col: number, entity: EntityAgent | EntityBox): boolean {
 		const cell = this.getCell(row, col);
 
-		if (cell && hasEntity(cell) && !cell.entity) {
-			(cell as FreeCell).entity = entity;
+		if (cell && canHaveEntity(cell) && !cell.entity) {
+			(cell as CellFree).entity = entity;
 			return true;
 		}
 
@@ -56,8 +130,18 @@ class GridStore {
 	removeEntity(row: number, col: number): boolean {
 		const cell = this.getCell(row, col);
 
-		if (cell && hasEntity(cell) && cell.entity) {
-			(cell as FreeCell).entity = undefined;
+		if (cell && canHaveEntity(cell) && cell.entity) {
+			(cell as CellFree).entity = undefined;
+			return true;
+		}
+
+		return false;
+	}
+
+	hasEntity(row: number, col: number): boolean {
+		const cell = this.getCell(row, col);
+
+		if (cell && canHaveEntity(cell) && cell.entity) {
 			return true;
 		}
 
@@ -68,11 +152,11 @@ class GridStore {
 		const fromCell = this.getCell(fromRow, fromCol);
 		const toCell = this.getCell(toRow, toCol);
 
-		if (!fromCell || !hasEntity(fromCell) || !fromCell.entity) {
+		if (!fromCell || !canHaveEntity(fromCell) || !fromCell.entity) {
 			return false;
 		}
 
-		if (!toCell || !hasEntity(toCell) || toCell.entity) {
+		if (!toCell || !canHaveEntity(toCell) || toCell.entity) {
 			return false;
 		}
 
@@ -80,6 +164,22 @@ class GridStore {
 		this.removeEntity(fromRow, fromCol);
 		this.addEntity(toRow, toCol, entity);
 		return true;
+	}
+
+	fromLevel(level: string) {
+		const sections = parseSections(level);
+		const colors = parseColors(sections['colors'] || []);
+		const grid = parseLevel(sections['initial'] || [], colors);
+		const width = grid[0]?.length || 0;
+		const height = grid.length;
+
+		this.width = width;
+		this.height = height;
+		this.grid = grid;
+	}
+
+	toString() {
+		return 'awer';
 	}
 }
 
@@ -91,41 +191,29 @@ export { setGrid, getGrid };
 const default_level = `#domain
 hospital
 #levelname
-Bouncer
+Spds
 #colors
-red: 0, A, S, Y
-purple: 2
-blue: 3
-grey: C, L, U, B, D, H
-pink: 1, T, O
-orange: E
-cyan: 4, F, G
-brown: 5
+blue: 0,1,2
 #initial
-++++++++++++
-+ ++4+SOO+ +
-+T   +A  +F+
-++    Y  5 +
-+CL2UB+3++ +
-+     +  +G+
-+ 1  0+E + +
-+     +  + +
-+     + H+ +
-+     + D+ +
-++++++++++++
++++++++++++++
++      1    +
++           +
+++++++ ++++++
++    0   2  +
++  +     +  +
++        +  +
++++++++++++++
 #goal
-++++++++++++
-+0++ +   +F+
-+    +   + +
-++       54+
-+  2  +3++ +
-+     +  + +
-+     +  + +
-+    T+A + +
-+    O+S + +
-+1   O+Y +G+
-++++++++++++
-#end`;
++++++++++++++
++       0   +
++           +
+++++++ ++++++
++           +
++2 +     +  +
++1       +  +
++++++++++++++
+#end
+`;
 
 const parseSections = (levelString: string) => {
 	const sections: Record<string, string[]> = {};
@@ -152,28 +240,35 @@ const parseColors = (colorsSection: string[]) => {
 	return colors;
 };
 
-const parseLevel = (lines: string[], colors: Record<string, Color>, isGoal = false): Cell[][] => {
-	const width = Math.max(...lines.map((line) => line.length));
+const parseLevel = (lines: string[], colors: Record<string, Color>): Cell[][] => {
+	const width = Math.max(...lines.map((line) => line.trim().length));
 	const height = lines.length;
 	const grid: Cell[][] = [];
 
+	let id = 0;
+
 	for (let y = 0; y < height; y++) {
 		const row: Cell[] = [];
+		let haveSeenWall = false;
 		for (let x = 0; x < width; x++) {
-			const char = lines[y][x] || ' ';
+			const char = lines[y][x] || '';
 			let cell: Cell;
 
 			if (char === '+') {
-				cell = { type: CellType.Wall };
+				haveSeenWall = true;
+				cell = { type: CellVariant.Wall, id: (id++).toString() };
+			} else if (!haveSeenWall) {
+				cell = { type: CellVariant.Empty, id: (id++).toString() };
 			} else if (char === ' ') {
-				cell = { type: CellType.Free };
+				cell = { type: CellVariant.Free, id: (id++).toString() };
 			} else if (colors?.[char]) {
 				const entity = { type: EntityType.Agent, color: colors[char], id: char };
-				cell = isGoal ? { type: CellType.Goal, entity, id: char } : { type: CellType.Free, entity };
+				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
 			} else if (char.match(/[A-Z]/i)) {
-				cell = isGoal ? { type: CellType.Goal, id: char } : { type: CellType.Free };
+				const entity = { type: EntityType.Box, color: colors[char], id: char };
+				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
 			} else {
-				cell = { type: CellType.Empty, id: `${x},${y}` };
+				cell = { type: CellVariant.Empty, id: (id++).toString() };
 			}
 			row.push(cell);
 		}
@@ -182,7 +277,7 @@ const parseLevel = (lines: string[], colors: Record<string, Color>, isGoal = fal
 	return grid;
 };
 
-const fromLevel = (levelString: string) => {
+export const fromLevel = (levelString: string) => {
 	const sections = parseSections(levelString);
 	const colors = parseColors(sections['colors'] || []);
 	const initialGrid = parseLevel(sections['initial'] || [], colors);
@@ -207,5 +302,5 @@ const colorMap: Record<Color, string> = {
 };
 
 export function toCSSColor(color: Color): string {
-	return colorMap[color];
+	return colorMap[color.toLowerCase() as Color];
 }

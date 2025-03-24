@@ -1,34 +1,92 @@
 <script lang="ts">
-	import Agent from './Agent.svelte';
-	import Box from './Box.svelte';
-	import type { Cell as CellType } from './cell';
-	import { hasEntity, isAgent, isBox, isGoal } from './store/GridStore.svelte';
+	import Entity from './Entity.svelte';
+	import {
+		canHaveEntity,
+		CellVariant,
+		isAgentGoalCell,
+		isBoxGoalCell,
+		isEmptyCell,
+		isFreeCell,
+		isGoalCell,
+		isWallCell,
+		type Cell as CellType
+	} from './store/cell';
+	import { getGrid } from './store/GridStore.svelte';
+	import { getTool } from './store/ToolStore.svelte';
 
 	type Props = {
 		cell: CellType;
+		row: number;
+		col: number;
 	};
 
-	const { cell }: Props = $props();
+	const { cell, row, col }: Props = $props();
 
-	const cellStyles = {
-		free: '#c0c0c0',
-		wall: 'black',
-		goal: '#dfdf02',
-		empty: ''
-	};
+	const grid = getGrid();
+
+	const tool = getTool();
+
+	function paintCell(ev: MouseEvent) {
+		if (ev.buttons == 1 && tool.tool && !tool.isDragging) {
+			grid.setCell(row, col, tool.tool);
+		}
+	}
+
+	function cellMouseDownHandler(ev: MouseEvent) {
+		paintCell(ev);
+	}
+
+	function cellMouseOverHandler(ev: MouseEvent) {
+		paintCell(ev);
+	}
+
+	function dragoverHandler(ev: DragEvent) {
+		ev.preventDefault();
+		if (!ev?.dataTransfer) return;
+	}
+
+	function cellDropHandler(ev: DragEvent) {
+		ev.preventDefault();
+		if (!ev?.dataTransfer) return;
+		const entity = ev.dataTransfer.getData('entity');
+		if (entity) {
+			const d = JSON.parse(entity);
+			grid.moveEntity(d.row, d.col, row, col);
+			ev.stopPropagation();
+			return;
+		}
+	}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <div
-	style={`--bg-color: ${cellStyles[cell.type]}`}
-	class={`@container flex aspect-square select-none items-center justify-center bg-[var(--bg-color)]`}
+	class={[
+		'cell',
+		{
+			'bg-[#c0c0c0]': canHaveEntity(cell),
+			'bg-[black]': isWallCell(cell),
+			'bg-[rgba(0, 0, 0, 0)]': isEmptyCell(cell)
+		}
+	]}
+	onmousedown={cellMouseDownHandler}
+	onmouseover={cellMouseOverHandler}
+	ondragover={dragoverHandler}
+	ondrop={cellDropHandler}
 >
-	{#if hasEntity(cell) && cell.entity}
-		{#if isAgent(cell.entity)}
-			<Agent agent={cell.entity} />
-		{:else if isBox(cell.entity)}
-			<Box box={cell.entity} />
-		{/if}
-	{:else if isGoal(cell)}
-		{cell.id}
+	{#if isBoxGoalCell(cell)}
+		<div class="goal entity boxgoal">
+			{cell.goalFor}
+		</div>
+	{:else if isAgentGoalCell(cell)}
+		<div class="goal entity agentgoal">
+			{cell.goalFor}
+		</div>
+	{/if}
+
+	{#if canHaveEntity(cell) && cell.entity}
+		<!-- Render the Entity if the cell has one -->
+		<Entity {cell} {row} {col} />
 	{/if}
 </div>
