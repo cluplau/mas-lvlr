@@ -18,19 +18,19 @@ export enum CellVariant {
 	Empty = 'empty'
 }
 
-export enum EntityType {
+export enum EntityVariant {
 	Agent = 'agent',
 	Box = 'box'
 }
 
 export interface EntityAgent {
-	type: EntityType.Agent;
+	type: EntityVariant.Agent;
 	color: Color;
 	id: string;
 }
 
 export interface EntityBox {
-	type: EntityType.Box;
+	type: EntityVariant.Box;
 	color: Color;
 	id: string;
 }
@@ -102,9 +102,17 @@ export function canHaveEntity(cell: Cell): cell is CellFree | CellAgentGoal | Ce
 }
 
 export function isAgentEntity(entity: EntityAgent | EntityBox): entity is EntityAgent {
-	return entity.type === EntityType.Agent;
+	return entity.type === EntityVariant.Agent;
 }
 
 export function isBoxEntity(entity: EntityAgent | EntityBox): entity is EntityBox {
-	return entity.type === EntityType.Box;
+	return entity.type === EntityVariant.Box;
+}
+
+export function isEntityVariant(variant: EntityVariant | CellVariant): variant is EntityVariant {
+	return variant === EntityVariant.Agent || variant === EntityVariant.Box;
+}
+
+export function isCellVariant(variant: EntityVariant | CellVariant): variant is CellVariant {
+	return !isEntityVariant(variant);
 }

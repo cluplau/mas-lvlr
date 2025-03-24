@@ -1,6 +1,6 @@
 import {
 	CellVariant,
-	EntityType,
+	EntityVariant,
 	canHaveEntity,
 	type EntityAgent,
 	type EntityBox,
@@ -72,7 +72,7 @@ class GridStore {
 		return undefined;
 	}
 
-	setCell(row: number, col: number, type: CellVariant): Cell | undefined {
+	setCell(row: number, col: number, type: CellVariant, id: string = 'A'): Cell | undefined {
 		let cell = this.getCell(row, col);
 		if (!cell) {
 			return;
@@ -100,7 +100,7 @@ class GridStore {
 			this.grid[row][col] = {
 				id: cell.id,
 				type: CellVariant.BoxGoal,
-				goalFor: 'A',
+				goalFor: id,
 				entity: canHaveEntity(cell) ? cell.entity : undefined
 			} satisfies CellBoxGoal;
 			return;
@@ -109,7 +109,7 @@ class GridStore {
 			this.grid[row][col] = {
 				id: cell.id,
 				type: CellVariant.AgentGoal,
-				goalFor: '0',
+				goalFor: id,
 				entity: canHaveEntity(cell) ? cell.entity : undefined
 			} satisfies CellAgentGoal;
 			return;
@@ -193,24 +193,23 @@ hospital
 #levelname
 Spds
 #colors
-blue: 0,1,2
 #initial
 +++++++++++++
-+      1    +
 +           +
-++++++ ++++++
-+    0   2  +
-+  +     +  +
-+        +  +
++           +
++           +
++           +
++           +
++           +
 +++++++++++++
 #goal
 +++++++++++++
-+       0   +
 +           +
-++++++ ++++++
 +           +
-+2 +     +  +
-+1       +  +
++           +
++           +
++           +
++           +
 +++++++++++++
 #end
 `;
@@ -262,10 +261,10 @@ const parseLevel = (lines: string[], colors: Record<string, Color>): Cell[][] =>
 			} else if (char === ' ') {
 				cell = { type: CellVariant.Free, id: (id++).toString() };
 			} else if (colors?.[char]) {
-				const entity = { type: EntityType.Agent, color: colors[char], id: char };
+				const entity = { type: EntityVariant.Agent, color: colors[char], id: char };
 				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
 			} else if (char.match(/[A-Z]/i)) {
-				const entity = { type: EntityType.Box, color: colors[char], id: char };
+				const entity = { type: EntityVariant.Box, color: colors[char], id: char };
 				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
 			} else {
 				cell = { type: CellVariant.Empty, id: (id++).toString() };

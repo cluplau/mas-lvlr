@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { canHaveEntity, isAgentEntity, isBoxEntity, type Cell as CellType } from './store/cell';
-	import { toCSSColor } from './store/GridStore.svelte';
+	import { getGrid, toCSSColor } from './store/GridStore.svelte';
 	import { getTool } from './store/ToolStore.svelte';
 
 	type Props = {
@@ -12,6 +12,7 @@
 	const { cell, row, col }: Props = $props();
 
 	const tool = getTool();
+	const grid = getGrid();
 
 	function entityDragstartHandler(ev: DragEvent) {
 		if (!ev?.dataTransfer) return;
@@ -22,6 +23,10 @@
 
 	function entityDragendHandler(ev: DragEvent) {
 		tool.setIsDragging(false);
+	}
+
+	function dblClickHandler() {
+		grid.removeEntity(row, col);
 	}
 
 	function stopProp(e: Event) {
@@ -39,6 +44,7 @@
 		onmouseup={() => tool.setIsDragging(false)}
 		ondragstart={entityDragstartHandler}
 		ondragendcapture={entityDragendHandler}
+		ondblclick={dblClickHandler}
 	>
 		{cell.entity.id}
 	</div>
@@ -48,6 +54,7 @@
 		style={`--entity-color: ${toCSSColor(cell.entity.color)}`}
 		draggable="true"
 		ondragstart={entityDragstartHandler}
+		ondblclick={dblClickHandler}
 	>
 		{cell.entity.id}
 	</div>

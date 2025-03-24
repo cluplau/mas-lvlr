@@ -3,9 +3,12 @@
 	import {
 		canHaveEntity,
 		CellVariant,
+		EntityVariant,
 		isAgentGoalCell,
 		isBoxGoalCell,
+		isCellVariant,
 		isEmptyCell,
+		isEntityVariant,
 		isFreeCell,
 		isGoalCell,
 		isWallCell,
@@ -27,19 +30,54 @@
 	const tool = getTool();
 
 	function paintCell(ev: MouseEvent) {
-		if (ev.buttons == 1 && tool.tool && !tool.isDragging) {
+		if (isCellVariant(tool.tool)) {
+			if (tool.tool == CellVariant.AgentGoal) {
+				grid.setCell(row, col, tool.tool, tool.nextAgentId);
+				return;
+			}
+			if (tool.tool == CellVariant.BoxGoal) {
+				grid.setCell(row, col, tool.tool, tool.nextBoxId);
+				return;
+			}
 			grid.setCell(row, col, tool.tool);
+			return;
+		}
+
+		if (isEntityVariant(tool.tool)) {
+			if (tool.tool == EntityVariant.Agent) {
+				grid.addEntity(row, col, {
+					type: tool.tool,
+					id: tool.nextAgentId,
+					color: tool.color
+				});
+				tool.incrementAgentId();
+			} else if (tool.tool == EntityVariant.Box) {
+				grid.addEntity(row, col, {
+					type: tool.tool,
+					id: tool.nextBoxId,
+					color: tool.color
+				});
+				tool.incrementBoxId();
+			}
 		}
 	}
 
-	function cellMouseDownHandler(ev: MouseEvent) {
+	function cellClickHandler(ev: MouseEvent) {
 		paintCell(ev);
 	}
 
 	function cellMouseOverHandler(ev: MouseEvent) {
-		if (tool.tool != CellVariant.AgentGoal && tool.tool != CellVariant.BoxGoal) {
-			paintCell(ev);
+		if (ev.buttons != 1 || tool.isDragging) {
+			return;
 		}
+		if (
+			tool.tool != CellVariant.Wall &&
+			tool.tool != CellVariant.Free &&
+			tool.tool != CellVariant.Empty
+		) {
+			return;
+		}
+		paintCell(ev);
 	}
 
 	function dragoverHandler(ev: DragEvent) {
@@ -72,7 +110,7 @@
 			'bg-[rgba(0, 0, 0, 0)]': isEmptyCell(cell)
 		}
 	]}
-	onmousedown={cellMouseDownHandler}
+	onclick={cellClickHandler}
 	onmouseover={cellMouseOverHandler}
 	ondragover={dragoverHandler}
 	ondrop={cellDropHandler}
