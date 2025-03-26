@@ -2,7 +2,7 @@
 	import ColorTools from '$lib/ColorTools.svelte';
 	import EntityTools from '$lib/EntityTools.svelte';
 	import GridTools from '$lib/GridTools.svelte';
-	import LvlTools from '$lib/LvlTools.svelte';
+	import LevelTools from '$lib/LevelTools.svelte';
 	import CellTools from '$lib/CellTools.svelte';
 	import { setGrid } from '$lib/store/GridStore.svelte';
 	import { getTool, setTool } from '$lib/store/ToolStore.svelte';
@@ -20,6 +20,13 @@
 	const tool = getTool();
 
 	function handleKeyDown(event: KeyboardEvent) {
+		const target = event.target as HTMLInputElement | null;
+		const tag = target?.tagName?.toLowerCase();
+
+		if (tag === 'input' || tag === 'textarea') {
+			return;
+		}
+
 		const key = event.key.toUpperCase();
 
 		// Check for A-Z
@@ -47,13 +54,16 @@
 
 <main class="flex h-screen w-screen">
 	<div
-		class="m-4 flex max-h-screen min-w-64 flex-col gap-4 overflow-y-auto rounded-md bg-secondary p-4"
+		class="m-4 flex max-h-screen w-64 min-w-64 flex-col gap-4 overflow-y-auto rounded-md bg-secondary p-4"
 	>
 		<div class="flex flex-row justify-between">
-			<h1 class="text-xl">Grid</h1>
+			<h1 class="text-xl">Level</h1>
 			<NewGridDialog></NewGridDialog>
 		</div>
+		<LevelTools />
 
+		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+		<h1 class="text-xl">Grid</h1>
 		<GridTools />
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
 
@@ -67,13 +77,9 @@
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
 		<h1 class="text-xl">Colors</h1>
 		<ColorTools />
-
-		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
-		<h1 class="text-xl">Tools</h1>
-		<LvlTools />
 	</div>
 
-	<div class="max-h-full w-full content-center p-4">
+	<div class="m-4 max-h-full w-full content-center">
 		{@render children()}
 	</div>
 </main>

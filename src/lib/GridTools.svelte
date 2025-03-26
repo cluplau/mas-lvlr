@@ -9,7 +9,7 @@
 
 <div class="flex flex-wrap justify-between gap-6 text-sm">
 	<div class="flex flex-col items-center gap-1">
-		<span class="text-md font-semibold">Rows: {store.height}</span>
+		<span class="text-md self-start font-semibold">Rows: {store.height}</span>
 		<div class="flex gap-2">
 			<Button size="icon" onclick={() => store.removeRow()} disabled={store.height <= 3}>
 				<Minus size="md" />
@@ -21,7 +21,7 @@
 	</div>
 
 	<div class="flex flex-col items-center gap-1">
-		<span class="font-semibold">Cols: {store.width}</span>
+		<span class="self-end font-semibold">Cols: {store.width}</span>
 		<div class="flex gap-2">
 			<Button size="icon" onclick={() => store.removeColumn()} disabled={store.width <= 3}>
 				<Minus />

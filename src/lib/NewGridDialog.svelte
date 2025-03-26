@@ -18,12 +18,13 @@
 
 	let open = $state(false);
 
+	let newName = $state('New level');
 	let newWidth = $state(20);
 	let newHeight = $state(14);
 	let newCellVariant = $state(CellVariant.Free);
 
 	function onCreateNewGrid() {
-		grid.fromDimensions(newWidth, newHeight, newCellVariant);
+		grid.fromDimensions(newWidth, newHeight, newCellVariant, newName);
 		open = false;
 	}
 </script>

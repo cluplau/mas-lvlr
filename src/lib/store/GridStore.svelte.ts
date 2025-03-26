@@ -2,6 +2,11 @@ import {
 	CellVariant,
 	EntityVariant,
 	canHaveEntity,
+	isWallCell,
+	isEmptyCell,
+	isAgentGoalCell,
+	isBoxGoalCell,
+	type Entity,
 	type EntityAgent,
 	type EntityBox,
 	type Cell,
@@ -10,43 +15,46 @@ import {
 	type CellWall,
 	type CellEmpty,
 	type CellBoxGoal,
-	type CellAgentGoal,
-	isWallCell,
-	isEmptyCell,
-	isAgentGoalCell,
-	isBoxGoalCell,
-	type Entity
+	type CellAgentGoal
 } from '$lib/store/cell';
 import { localState } from '@sv-use/core';
 import { getContext, setContext } from 'svelte';
 
+const LEVEL_NAME_KEY = 'levelname';
 const GRID_KEY = 'grid';
 const WIDTH_KEY = 'width';
 const HEIGHT_KEY = 'height';
 
 class GridStore {
+	#name: { current: string } = localState(LEVEL_NAME_KEY, 'New level');
 	#grid: { current: Cell[][] } = localState(GRID_KEY, [[]]);
 	#width: { current: number } = localState(WIDTH_KEY, 0);
 	#height: { current: number } = localState(HEIGHT_KEY, 0);
 
+	get name(): string {
+		return this.#name.current;
+	}
+	get grid(): Cell[][] {
+		return this.#grid.current;
+	}
 	get width(): number {
 		return this.#width.current;
 	}
 	get height(): number {
 		return this.#height.current;
 	}
-	get grid(): Cell[][] {
-		return this.#grid.current;
-	}
 
+	set name(v: string) {
+		this.#name.current = v;
+	}
+	set grid(v: Cell[][]) {
+		this.#grid.current = v;
+	}
 	set width(v: number) {
 		this.#width.current = v;
 	}
 	set height(v: number) {
 		this.#height.current = v;
-	}
-	set grid(v: Cell[][]) {
-		this.#grid.current = v;
 	}
 
 	addRow() {
@@ -192,7 +200,7 @@ class GridStore {
 
 	toString() {
 		const domain = 'hospital';
-		const levelName = 'Level';
+		const levelName = this.name;
 
 		const colorMap = new Map<string, Set<string>>();
 		const addToColorMap = (color: string, id: string) => {
@@ -252,13 +260,14 @@ ${renderGrid(true)}
 	}
 
 	load(level: string) {
-		const { width, height, initialGrid } = fromLevel(level);
+		const { width, height, initialGrid, name } = fromLevel(level);
 		this.width = width;
 		this.height = height;
 		this.grid = initialGrid;
+		this.name = name;
 	}
 
-	fromDimensions(width: number, height: number, cells: CellVariant) {
+	fromDimensions(width: number, height: number, cells: CellVariant, name: string) {
 		let grid: Cell[][] = [];
 		let id = 0;
 		for (let i = 0; i < height; i++) {
@@ -272,6 +281,7 @@ ${renderGrid(true)}
 		this.width = width;
 		this.height = height;
 		this.grid = grid;
+		this.name = name;
 	}
 }
 
@@ -484,8 +494,9 @@ export const fromLevel = (levelString: string) => {
 	const initialGrid = parseLevel(initial, goal, colors);
 	const width = initialGrid[0]?.length || 0;
 	const height = initialGrid.length;
+	const name = sections['levelname'][0].trim();
 
-	return { initialGrid, height, width };
+	return { initialGrid, height, width, name };
 };
 
 const colorMap: Record<Color, string> = {

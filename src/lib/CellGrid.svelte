@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="mx-auto max-h-full overflow-hidden rounded-md bg-secondary p-4"
+	class="mx-auto box-content max-h-[calc(100%-32px)] overflow-hidden rounded-md bg-secondary p-4"
 	style={`aspect-ratio: ${store.width} / ${store.height}`}
 >
 	<section
