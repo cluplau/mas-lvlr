@@ -9,10 +9,10 @@
 
 <div class="flex flex-wrap justify-between gap-6 text-sm">
 	<div class="flex flex-col items-center gap-1">
-		<span class="font-semibold text-white">Rows: {store.height}</span>
+		<span class="text-md font-semibold">Rows: {store.height}</span>
 		<div class="flex gap-2">
 			<Button size="icon" onclick={() => store.removeRow()} disabled={store.height <= 3}>
-				<Minus />
+				<Minus size="md" />
 			</Button>
 			<Button size="icon" onclick={() => store.addRow()} disabled={store.height >= 50}>
 				<Plus />
@@ -21,7 +21,7 @@
 	</div>
 
 	<div class="flex flex-col items-center gap-1">
-		<span class="font-semibold text-white">Cols: {store.width}</span>
+		<span class="font-semibold">Cols: {store.width}</span>
 		<div class="flex gap-2">
 			<Button size="icon" onclick={() => store.removeColumn()} disabled={store.width <= 3}>
 				<Minus />

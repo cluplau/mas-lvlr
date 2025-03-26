@@ -257,6 +257,22 @@ ${renderGrid(true)}
 		this.height = height;
 		this.grid = initialGrid;
 	}
+
+	fromDimensions(width: number, height: number, cells: CellVariant) {
+		let grid: Cell[][] = [];
+		let id = 0;
+		for (let i = 0; i < height; i++) {
+			let row = [];
+			for (let j = 0; j < width; j++) {
+				row.push({ type: cells, id: (id++).toString() } as Cell);
+			}
+			grid.push(row);
+		}
+
+		this.width = width;
+		this.height = height;
+		this.grid = grid;
+	}
 }
 
 const defaultLevel = `#domain

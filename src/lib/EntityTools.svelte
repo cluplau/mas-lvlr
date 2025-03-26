@@ -16,7 +16,7 @@
 	];
 </script>
 
-<div class="grid grid-cols-3 gap-4">
+<div class="grid grid-cols-4 gap-4">
 	<div class={[...baseClasses, { outline: tool.tool == EntityVariant.Box }]}>
 		<button
 			class="entity box"
@@ -44,7 +44,7 @@
 	<Checkbox id="auto_inc_box" bind:checked={tool.autoIncrementBox.current} />
 	<Label
 		for="auto_inc_box"
-		class="text-sm font-medium leading-none text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+		class="text-sm font-medium leading-none  peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 	>
 		Auto increment box id
 	</Label>
@@ -54,7 +54,7 @@
 	<Checkbox id="auto_inc_agent" bind:checked={tool.autoIncrementAgent.current} />
 	<Label
 		for="auto_inc_agent"
-		class="text-sm font-medium leading-none text-white peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+		class="text-sm font-medium leading-none  peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 	>
 		Auto increment agent id
 	</Label>

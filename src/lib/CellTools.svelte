@@ -14,7 +14,7 @@
 	];
 </script>
 
-<div class="grid grid-cols-3 grid-rows-2 gap-4">
+<div class="grid grid-cols-4 grid-rows-2 gap-4">
 	<button
 		class={[...baseClasses, 'free', { outline: tool.tool == CellVariant.Free }]}
 		aria-label="free"
@@ -26,13 +26,6 @@
 		class={[...baseClasses, 'wall', { outline: tool.tool == CellVariant.Wall }]}
 		aria-label="wall"
 		on:click={() => tool.setTool(CellVariant.Wall)}
-	>
-	</button>
-
-	<button
-		class={[...baseClasses, 'empty border-2 ', { outline: tool.tool == CellVariant.Empty }]}
-		aria-label="empty"
-		on:click={() => tool.setTool(CellVariant.Empty)}
 	>
 	</button>
 
@@ -57,4 +50,15 @@
 			{tool.nextAgentId}
 		</button>
 	</div>
+
+	<button
+		class={[
+			...baseClasses,
+			'empty border-2 border-background/40',
+			{ outline: tool.tool == CellVariant.Empty }
+		]}
+		aria-label="empty"
+		on:click={() => tool.setTool(CellVariant.Empty)}
+	>
+	</button>
 </div>

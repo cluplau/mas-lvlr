@@ -9,8 +9,6 @@
 		isCellVariant,
 		isEmptyCell,
 		isEntityVariant,
-		isFreeCell,
-		isGoalCell,
 		isWallCell,
 		type Cell as CellType
 	} from './store/cell';

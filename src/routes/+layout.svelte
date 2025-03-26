@@ -12,6 +12,7 @@
 	import { dev } from '$app/environment';
 	import { RenderScan } from 'svelte-render-scan';
 	import { onMount } from 'svelte';
+	import NewGridDialog from '$lib/NewGridDialog.svelte';
 
 	setGrid();
 	setTool();
@@ -44,27 +45,31 @@
 	<RenderScan />
 {/if}
 
-<main class="dark flex h-screen w-screen bg-background/80">
+<main class="flex h-screen w-screen">
 	<div
-		class="m-4 flex max-h-screen min-w-64 flex-col gap-4 overflow-y-auto rounded-md bg-foreground/10 p-4"
+		class="m-4 flex max-h-screen min-w-64 flex-col gap-4 overflow-y-auto rounded-md bg-secondary p-4"
 	>
-		<h1 class="text-xl text-white">Grid</h1>
+		<div class="flex flex-row justify-between">
+			<h1 class="text-xl">Grid</h1>
+			<NewGridDialog></NewGridDialog>
+		</div>
+
 		<GridTools />
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
 
-		<h1 class=" text-xl text-white">Cells</h1>
+		<h1 class=" text-xl">Cells</h1>
 		<CellTools />
 
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
-		<h1 class="text-xl text-white">Entities</h1>
+		<h1 class="text-xl">Entities</h1>
 		<EntityTools />
 
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
-		<h1 class="text-xl text-white">Colors</h1>
+		<h1 class="text-xl">Colors</h1>
 		<ColorTools />
 
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
-		<h1 class="text-xl text-white">Tools</h1>
+		<h1 class="text-xl">Tools</h1>
 		<LvlTools />
 	</div>
 
