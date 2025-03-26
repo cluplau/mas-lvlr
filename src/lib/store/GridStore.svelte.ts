@@ -496,11 +496,11 @@ const setGrid = () => {
 	let savedHeight = localStorage.getItem(HEIGHT_KEY);
 
 	if (!savedGrid || !savedWidth || !savedHeight) {
-		let gridStore = GridStore.load(defaultLevel);
+		const { width, height, initialGrid } = fromLevel(defaultLevel);
 
-		localStorage.setItem(GRID_KEY, JSON.stringify(gridStore.grid));
-		localStorage.setItem(WIDTH_KEY, gridStore.width.toString());
-		localStorage.setItem(HEIGHT_KEY, gridStore.height.toString());
+		localStorage.setItem(GRID_KEY, JSON.stringify(initialGrid));
+		localStorage.setItem(WIDTH_KEY, width.toString());
+		localStorage.setItem(HEIGHT_KEY, height.toString());
 	}
 
 	setContext('grid', new GridStore());
