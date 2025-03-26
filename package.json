@@ -46,6 +46,7 @@
 	},
 	"dependencies": {
 		"@cantoo/html2canvas": "^1.5.9",
-		"@sv-use/core": "^1.15.1"
+		"@sv-use/core": "^1.15.1",
+		"svelte-meta-tags": "^4.2.0"
 	}
 }

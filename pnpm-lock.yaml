@@ -14,6 +14,9 @@ importers:
       '@sv-use/core':
         specifier: ^1.15.1
         version: 1.15.1(svelte@5.19.6)
+      svelte-meta-tags:
+        specifier: ^4.2.0
+        version: 4.2.0(svelte@5.19.6)
     devDependencies:
       '@eslint/compat':
         specifier: ^1.2.5
@@ -1370,6 +1373,9 @@ packages:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
     engines: {node: '>=6'}
 
+  schema-dts@1.1.5:
+    resolution: {integrity: sha512-RJr9EaCmsLzBX2NDiO5Z3ux2BVosNZN5jo0gWgsyKvxKIUL5R3swNvoorulAeL9kLB0iTSX7V6aokhla2m7xbg==}
+
   semver@7.7.0:
     resolution: {integrity: sha512-DrfFnPzblFmNrIZzg5RzHegbiRWg7KMR7btwi2yjHwx06zsUbO5g613sVwEV7FTwmzJu+Io0lJe2GJ3LxqpvBQ==}
     engines: {node: '>=10'}
@@ -1450,6 +1456,11 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
+
+  svelte-meta-tags@4.2.0:
+    resolution: {integrity: sha512-VFnbdN4CNLeGaiRK++mhHKm/otgId3qM0hY6fu6vhh+e+jGE9Xr3kSUjgKAEnquktskEjUEo7W0ek7EANsyTHw==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte-render-scan@1.1.0:
     resolution: {integrity: sha512-9S73wEtcnn9Hn0HsOSufm+AC+3Es2rMXoWMEWk6Fa3w3yORBg6khOSsZ8+kj/rY4BJRZTyjuFQBytFPGC8YHGQ==}
@@ -2750,6 +2761,8 @@ snapshots:
     dependencies:
       mri: 1.2.0
 
+  schema-dts@1.1.5: {}
+
   semver@7.7.0: {}
 
   set-cookie-parser@2.7.1: {}
@@ -2833,6 +2846,11 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.1)
       postcss-selector-parser: 7.1.0
     optionalDependencies:
+      svelte: 5.19.6
+
+  svelte-meta-tags@4.2.0(svelte@5.19.6):
+    dependencies:
+      schema-dts: 1.1.5
       svelte: 5.19.6
 
   svelte-render-scan@1.1.0(svelte@5.19.6):
