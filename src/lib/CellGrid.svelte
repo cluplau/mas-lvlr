@@ -6,7 +6,8 @@
 </script>
 
 <section
-	class="ml-auto grid max-h-full gap-[1px]"
+	id="grid_visualization"
+	class="border-s-[hsl(var(--background) / 0.4)] mx-auto grid max-h-full"
 	style={`
       grid-template-rows: repeat(${store.height}, minmax(0, 1fr)); 
       grid-template-columns: repeat(${store.width}, minmax(0, 1fr));

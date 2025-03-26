@@ -15,7 +15,7 @@ class ToolStore {
 	nextAgentId = $state('0');
 	nextBoxId = $state('A');
 	autoIncrementAgent = localState(AUTO_INC_AGENT_KEY, false);
-	autoIncrementBox = localState(AUTO_INC_AGENT_KEY, false);
+	autoIncrementBox = localState(AUTO_INC_BOX_KEY, false);
 
 	get tool(): CellVariant | EntityVariant {
 		return this.#tool.current;

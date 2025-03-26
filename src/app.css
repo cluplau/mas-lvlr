@@ -79,10 +79,25 @@
 
 
 .cell {
+  /* border-right: solid 1px hsl(var(--background) / 0.4);
+  border-bottom: solid 1px hsl(var(--background) / 0.4); */
   aspect-ratio: 1 / 1;
   user-select: none;
   container-type: size;
   position: relative;
+}
+
+.cell.empty {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.cell.free {
+  border: solid 0.5px black;
+  background-color: #c0c0c0;
+}
+
+.cell.wall {
+  background-color: black;
 }
 
 .entity {

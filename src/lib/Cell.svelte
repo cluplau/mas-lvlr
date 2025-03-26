@@ -105,9 +105,9 @@
 	class={[
 		'cell',
 		{
-			'bg-[#c0c0c0]': canHaveEntity(cell),
-			'bg-[black]': isWallCell(cell),
-			'bg-[rgba(0, 0, 0, 0)]': isEmptyCell(cell)
+			free: canHaveEntity(cell),
+			wall: isWallCell(cell),
+			empty: isEmptyCell(cell)
 		}
 	]}
 	onclick={cellClickHandler}

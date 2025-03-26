@@ -10,19 +10,43 @@ import {
 	type CellWall,
 	type CellEmpty,
 	type CellBoxGoal,
-	type CellAgentGoal
+	type CellAgentGoal,
+	isWallCell,
+	isEmptyCell,
+	isAgentGoalCell,
+	isBoxGoalCell,
+	type Entity
 } from '$lib/store/cell';
+import { localState } from '@sv-use/core';
 import { getContext, setContext } from 'svelte';
 
-class GridStore {
-	width: number = $state(0);
-	height: number = $state(0);
-	grid: Cell[][] = $state([[]]);
+const GRID_KEY = 'grid';
+const WIDTH_KEY = 'width';
+const HEIGHT_KEY = 'height';
 
-	constructor(width: number, height: number, grid: Cell[][]) {
-		this.width = width;
-		this.height = height;
-		this.grid = grid;
+class GridStore {
+	#grid: { current: Cell[][] } = localState(GRID_KEY, [[]]);
+	#width: { current: number } = localState(WIDTH_KEY, 0);
+	#height: { current: number } = localState(HEIGHT_KEY, 0);
+
+	get width(): number {
+		return this.#width.current;
+	}
+	get height(): number {
+		return this.#height.current;
+	}
+	get grid(): Cell[][] {
+		return this.#grid.current;
+	}
+
+	set width(v: number) {
+		this.#width.current = v;
+	}
+	set height(v: number) {
+		this.#height.current = v;
+	}
+	set grid(v: Cell[][]) {
+		this.#grid.current = v;
 	}
 
 	addRow() {
@@ -166,36 +190,84 @@ class GridStore {
 		return true;
 	}
 
-	fromLevel(level: string) {
-		const sections = parseSections(level);
-		const colors = parseColors(sections['colors'] || []);
-		const grid = parseLevel(sections['initial'] || [], colors);
-		const width = grid[0]?.length || 0;
-		const height = grid.length;
+	toString() {
+		const domain = 'hospital';
+		const levelName = 'Level';
 
-		this.width = width;
-		this.height = height;
-		this.grid = grid;
+		const colorMap = new Map<string, Set<string>>();
+		const addToColorMap = (color: string, id: string) => {
+			if (!colorMap.has(color)) colorMap.set(color, new Set());
+			colorMap.get(color)!.add(id);
+		};
+
+		// Collect colors info from the grid
+		for (const row of this.grid) {
+			for (const cell of row) {
+				if (canHaveEntity(cell) && cell.entity) {
+					addToColorMap(cell.entity.color, cell.entity.id);
+				}
+			}
+		}
+
+		// Generate #colors section
+		const colorsSection = Array.from(colorMap.entries())
+			.map(([color, ids]) => `${color}: ${Array.from(ids).join(',')}`)
+			.join('\n');
+
+		// Grid renderer
+		const renderGrid = (isGoal: boolean): string => {
+			return this.grid
+				.map((row) =>
+					row
+						.map((cell) => {
+							if (isWallCell(cell)) return '+';
+							if (isEmptyCell(cell)) return ' ';
+							if (isGoal) {
+								if (isAgentGoalCell(cell)) return cell.goalFor;
+								if (isBoxGoalCell(cell)) return cell.goalFor;
+								return ' ';
+							} else {
+								if (canHaveEntity(cell) && cell.entity) {
+									return cell.entity.id;
+								}
+								return ' ';
+							}
+						})
+						.join('')
+				)
+				.join('\n');
+		};
+
+		return `#domain
+${domain}
+#levelname
+${levelName}
+#colors
+${colorsSection}
+#initial
+${renderGrid(false)}
+#goal
+${renderGrid(true)}
+#end`;
 	}
 
-	toString() {
-		return 'TODO: unimplemented';
+	load(level: string) {
+		const { width, height, initialGrid } = fromLevel(level);
+		this.width = width;
+		this.height = height;
+		this.grid = initialGrid;
 	}
 }
 
-const setGrid = () => setContext('grid', fromLevel(default_level));
-const getGrid = () => getContext('grid') as GridStore;
-
-export { setGrid, getGrid };
-
-const default_level = `#domain
+const defaultLevel = `#domain
 hospital
 #levelname
 Spds
 #colors
+blue: 0
 #initial
 +++++++++++++
-+           +
++0          +
 +           +
 +           +
 +           +
@@ -209,10 +281,16 @@ Spds
 +           +
 +           +
 +           +
-+           +
++          0+
 +++++++++++++
 #end
 `;
+
+const normalizeLines = (lines: string[]): string[] => {
+	const trimmed = lines.map((line) => line.replace(/\s+$/, '')); // remove trailing spaces
+	const width = Math.max(...trimmed.map((line) => line.length));
+	return trimmed.map((line) => line.padEnd(width, ' '));
+};
 
 const parseSections = (levelString: string) => {
 	const sections: Record<string, string[]> = {};
@@ -239,36 +317,140 @@ const parseColors = (colorsSection: string[]) => {
 	return colors;
 };
 
-const parseLevel = (lines: string[], colors: Record<string, Color>): Cell[][] => {
-	const width = Math.max(...lines.map((line) => line.trim().length));
+const floodFillOutside = (lines: string[]): boolean[][] => {
+	const height = lines.length;
+	const width = Math.max(...lines.map((line) => line.length));
+	const visited = Array.from({ length: height }, () => Array(width).fill(false));
+
+	const inBounds = (y: number, x: number) => y >= 0 && y < height && x >= 0 && x < lines[y].length;
+
+	const queue: [number, number][] = [];
+
+	for (let y = 0; y < height; y++) {
+		for (let x of [0, width - 1]) {
+			if (inBounds(y, x) && lines[y][x] !== '+') queue.push([y, x]);
+		}
+	}
+	for (let x = 0; x < width; x++) {
+		for (let y of [0, height - 1]) {
+			if (inBounds(y, x) && lines[y][x] !== '+') queue.push([y, x]);
+		}
+	}
+
+	while (queue.length > 0) {
+		const [y, x] = queue.shift()!;
+		if (!inBounds(y, x) || visited[y][x]) continue;
+		if (lines[y][x] === '+') continue;
+
+		visited[y][x] = true;
+
+		[
+			[0, 1],
+			[1, 0],
+			[0, -1],
+			[-1, 0]
+		].forEach(([dy, dx]) => {
+			const ny = y + dy;
+			const nx = x + dx;
+			if (inBounds(ny, nx) && !visited[ny][nx] && lines[ny][nx] !== '+') {
+				queue.push([ny, nx]);
+			}
+		});
+	}
+
+	return visited;
+};
+
+const detectEnclosedVoids = (lines: string[], alreadyVisited: boolean[][]): boolean[][] => {
+	const height = lines.length;
+	const width = lines[0]?.length || 0;
+	const voids = Array.from({ length: height }, () => Array(width).fill(false));
+	const visited = alreadyVisited.map((row) => [...row]);
+
+	const inBounds = (y: number, x: number) => y >= 0 && y < height && x >= 0 && x < width;
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			if (visited[y][x] || lines[y][x] === '+') continue;
+
+			const region: [number, number][] = [];
+			const queue: [number, number][] = [[y, x]];
+			let isEnclosed = true;
+			let containsContent = false;
+
+			while (queue.length > 0) {
+				const [cy, cx] = queue.pop()!;
+				if (!inBounds(cy, cx) || visited[cy][cx] || lines[cy][cx] === '+') continue;
+
+				const ch = lines[cy][cx];
+				if (ch.match(/[A-Z0-9]/)) containsContent = true;
+
+				visited[cy][cx] = true;
+				region.push([cy, cx]);
+
+				if (cy === 0 || cy === height - 1 || cx === 0 || cx === width - 1) {
+					isEnclosed = false;
+				}
+
+				for (const [dy, dx] of [
+					[0, 1],
+					[1, 0],
+					[0, -1],
+					[-1, 0]
+				]) {
+					queue.push([cy + dy, cx + dx]);
+				}
+			}
+
+			if (isEnclosed && !containsContent) {
+				for (const [vy, vx] of region) {
+					voids[vy][vx] = true;
+				}
+			}
+		}
+	}
+	return voids;
+};
+
+const parseLevel = (lines: string[], goals: string[], colors: Record<string, Color>): Cell[][] => {
+	const width = Math.max(...lines.map((line) => line.length));
 	const height = lines.length;
 	const grid: Cell[][] = [];
+	const outside = floodFillOutside(lines);
+	const voids = detectEnclosedVoids(lines, outside);
 
 	let id = 0;
 
 	for (let y = 0; y < height; y++) {
 		const row: Cell[] = [];
-		let haveSeenWall = false;
 		for (let x = 0; x < width; x++) {
 			const char = lines[y][x] || '';
+			const goal = goals[y][x] || '';
 			let cell: Cell;
+			let entity: Entity | null = null;
 
-			if (char === '+') {
-				haveSeenWall = true;
-				cell = { type: CellVariant.Wall, id: (id++).toString() };
-			} else if (!haveSeenWall) {
-				cell = { type: CellVariant.Empty, id: (id++).toString() };
-			} else if (char === ' ') {
-				cell = { type: CellVariant.Free, id: (id++).toString() };
+			if (char.match(/[A-Z]/i)) {
+				entity = { type: EntityVariant.Box, color: colors[char], id: char };
 			} else if (colors?.[char]) {
-				const entity = { type: EntityVariant.Agent, color: colors[char], id: char };
-				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
-			} else if (char.match(/[A-Z]/i)) {
-				const entity = { type: EntityVariant.Box, color: colors[char], id: char };
-				cell = { type: CellVariant.Free, entity, id: (id++).toString() };
-			} else {
-				cell = { type: CellVariant.Empty, id: (id++).toString() };
+				entity = { type: EntityVariant.Agent, color: colors[char], id: char };
 			}
+
+			if (outside[y][x] || voids[y][x]) {
+				cell = { type: CellVariant.Empty, id: (id++).toString() };
+			} else if (char === '+') {
+				cell = { type: CellVariant.Wall, id: (id++).toString() };
+			} else if (goal.match(/[A-Z]/i)) {
+				cell = { type: CellVariant.BoxGoal, id: (id++).toString(), goalFor: goal };
+			} else if (!isNaN(parseInt(goal, 10))) {
+				cell = { type: CellVariant.AgentGoal, id: (id++).toString(), goalFor: goal };
+			} else {
+				cell = { type: CellVariant.Free, id: (id++).toString() };
+			}
+
+			if (canHaveEntity(cell) && entity != null) {
+				cell.entity = entity;
+			}
+
 			row.push(cell);
 		}
 		grid.push(row);
@@ -279,12 +461,15 @@ const parseLevel = (lines: string[], colors: Record<string, Color>): Cell[][] =>
 export const fromLevel = (levelString: string) => {
 	const sections = parseSections(levelString);
 	const colors = parseColors(sections['colors'] || []);
-	const initialGrid = parseLevel(sections['initial'] || [], colors);
+
+	const initial = normalizeLines(sections['initial'] || []);
+	const goal = normalizeLines(sections['goal'] || []);
+
+	const initialGrid = parseLevel(initial, goal, colors);
 	const width = initialGrid[0]?.length || 0;
 	const height = initialGrid.length;
-	const gridStore = new GridStore(width, height, initialGrid);
 
-	return gridStore;
+	return { initialGrid, height, width };
 };
 
 const colorMap: Record<Color, string> = {
@@ -303,3 +488,22 @@ const colorMap: Record<Color, string> = {
 export function toCSSColor(color: Color): string {
 	return colorMap[color.toLowerCase() as Color];
 }
+
+const getGrid = () => getContext('grid') as GridStore;
+const setGrid = () => {
+	let savedGrid = localStorage.getItem(GRID_KEY);
+	let savedWidth = localStorage.getItem(WIDTH_KEY);
+	let savedHeight = localStorage.getItem(HEIGHT_KEY);
+
+	if (!savedGrid || !savedWidth || !savedHeight) {
+		let gridStore = GridStore.load(defaultLevel);
+
+		localStorage.setItem(GRID_KEY, JSON.stringify(gridStore.grid));
+		localStorage.setItem(WIDTH_KEY, gridStore.width.toString());
+		localStorage.setItem(HEIGHT_KEY, gridStore.height.toString());
+	}
+
+	setContext('grid', new GridStore());
+};
+
+export { setGrid, getGrid, GridStore };

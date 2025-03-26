@@ -35,6 +35,8 @@ export interface EntityBox {
 	id: string;
 }
 
+export type Entity = EntityAgent | EntityBox;
+
 export interface CellWall {
 	id: string;
 	type: CellVariant.Wall;
@@ -43,21 +45,21 @@ export interface CellWall {
 export interface CellFree {
 	id: string;
 	type: CellVariant.Free;
-	entity?: EntityAgent | EntityBox;
+	entity?: Entity;
 }
 
 export interface CellAgentGoal {
 	id: string;
 	type: CellVariant.AgentGoal;
 	goalFor: string;
-	entity?: EntityAgent | EntityBox;
+	entity?: Entity;
 }
 
 export interface CellBoxGoal {
 	id: string;
 	type: CellVariant.BoxGoal;
 	goalFor: string;
-	entity?: EntityAgent | EntityBox;
+	entity?: Entity;
 }
 
 export interface CellEmpty {
@@ -101,11 +103,11 @@ export function canHaveEntity(cell: Cell): cell is CellFree | CellAgentGoal | Ce
 	);
 }
 
-export function isAgentEntity(entity: EntityAgent | EntityBox): entity is EntityAgent {
+export function isAgentEntity(entity: Entity): entity is EntityAgent {
 	return entity.type === EntityVariant.Agent;
 }
 
-export function isBoxEntity(entity: EntityAgent | EntityBox): entity is EntityBox {
+export function isBoxEntity(entity: Entity): entity is EntityBox {
 	return entity.type === EntityVariant.Box;
 }
 

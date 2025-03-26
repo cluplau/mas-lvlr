@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Minus from '@lucide/svelte/icons/minus';
-	import Plus from '@lucide/svelte/icons/plus';
 	import Upload from '@lucide/svelte/icons/upload';
 	import Download from '@lucide/svelte/icons/download';
+	import ImageDown from '@lucide/svelte/icons/image-down';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Check from '@lucide/svelte/icons/check';
-	import { getGrid, setGrid } from './store/GridStore.svelte';
+	import { getGrid, GridStore, setGrid } from './store/GridStore.svelte';
 	import Button from './components/ui/button/button.svelte';
+	import html2canvas from '@cantoo/html2canvas';
 
 	const store = getGrid();
 
@@ -26,7 +26,7 @@
 		const reader = new FileReader();
 		reader.onload = () => {
 			const level = reader.result?.toString() ?? '';
-			store.fromLevel(level);
+			store.load(level);
 		};
 		reader.readAsText(file);
 	}
@@ -40,6 +40,25 @@
 		a.download = 'grid.lvl';
 		a.click();
 		URL.revokeObjectURL(url);
+	}
+
+	function downloadGridScreenshot() {
+		const element = document.getElementById('grid_visualization');
+
+		if (element == null) {
+			alert('Unable to create png');
+			return;
+		}
+
+		html2canvas(element, {
+			scale: 3,
+			backgroundColor: null
+		}).then((canvas) => {
+			const link = document.createElement('a');
+			link.download = 'div-content.png';
+			link.href = canvas.toDataURL('image/png');
+			link.click();
+		});
 	}
 
 	async function copyGrid() {
@@ -67,6 +86,10 @@
 
 			<Button size="icon" onclick={downloadGrid}>
 				<Download />
+			</Button>
+
+			<Button size="icon" onclick={downloadGridScreenshot}>
+				<ImageDown />
 			</Button>
 
 			<Button size="icon" onclick={copyGrid}>

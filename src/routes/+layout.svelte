@@ -45,7 +45,13 @@
 {/if}
 
 <main class="dark flex h-screen w-screen bg-background/80">
-	<div class="flex min-w-64 flex-col gap-4 p-4">
+	<div
+		class="m-4 flex max-h-screen min-w-64 flex-col gap-4 overflow-y-auto rounded-md bg-foreground/10 p-4"
+	>
+		<h1 class="text-xl text-white">Grid</h1>
+		<GridTools />
+		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
+
 		<h1 class=" text-xl text-white">Cells</h1>
 		<CellTools />
 
@@ -58,15 +64,11 @@
 		<ColorTools />
 
 		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
-		<h1 class="text-xl text-white">Grid</h1>
-		<GridTools />
-
-		<hr class="my-2 h-0.5 border-t-0 bg-neutral-100 dark:bg-white/10" />
 		<h1 class="text-xl text-white">Tools</h1>
 		<LvlTools />
 	</div>
 
-	<div class="max-h-full w-full p-4">
+	<div class="max-h-full w-full content-center p-4">
 		{@render children()}
 	</div>
 </main>
