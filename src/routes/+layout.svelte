@@ -13,6 +13,7 @@
 	import { RenderScan } from 'svelte-render-scan';
 	import { onMount } from 'svelte';
 	import NewGridDialog from '$lib/NewGridDialog.svelte';
+	import MetaTags from '$lib/MetaTags.svelte';
 
 	setGrid();
 	setTool();
@@ -51,6 +52,8 @@
 {#if dev && false}
 	<RenderScan />
 {/if}
+
+<MetaTags />
 
 <main class="flex h-screen w-screen">
 	<div
