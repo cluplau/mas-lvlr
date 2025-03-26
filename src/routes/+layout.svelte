@@ -18,6 +18,8 @@
 
 	const tool = getTool();
 
+	$inspect(tool.isDragging);
+
 	function handleKeyDown(event: KeyboardEvent) {
 		const key = event.key.toUpperCase();
 

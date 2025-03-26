@@ -19,23 +19,26 @@
 		class={[...baseClasses, 'free', { outline: tool.tool == CellVariant.Free }]}
 		aria-label="free"
 		on:click={() => tool.setTool(CellVariant.Free)}
-	></button>
+	>
+	</button>
 
 	<button
 		class={[...baseClasses, 'wall', { outline: tool.tool == CellVariant.Wall }]}
 		aria-label="wall"
 		on:click={() => tool.setTool(CellVariant.Wall)}
-	></button>
+	>
+	</button>
 
 	<button
 		class={[...baseClasses, 'empty border-2 ', { outline: tool.tool == CellVariant.Empty }]}
 		aria-label="empty"
 		on:click={() => tool.setTool(CellVariant.Empty)}
-	></button>
+	>
+	</button>
 
 	<div class={[...baseClasses, 'cell', { outline: tool.tool == CellVariant.BoxGoal }]}>
 		<button
-			class={['entity boxgoal ']}
+			class={['entity boxgoal']}
 			style={`--entity-color: ${toCSSColor(tool.color)}`}
 			aria-label="goal"
 			on:click={() => tool.setTool(CellVariant.BoxGoal)}
@@ -46,12 +49,12 @@
 
 	<div class={[...baseClasses, 'cell', { outline: tool.tool == CellVariant.AgentGoal }]}>
 		<button
-			class={['entity agentgoal ']}
+			class={['entity agentgoal']}
 			style={`--entity-color: ${toCSSColor(tool.color)}`}
 			aria-label="goal"
 			on:click={() => tool.setTool(CellVariant.AgentGoal)}
 		>
-			{tool.nextBoxId}
+			{tool.nextAgentId}
 		</button>
 	</div>
 </div>

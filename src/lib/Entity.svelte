@@ -22,7 +22,9 @@
 	}
 
 	function entityDragendHandler(ev: DragEvent) {
-		tool.setIsDragging(false);
+		setTimeout(() => {
+			tool.setIsDragging(false);
+		}, 200);
 	}
 
 	function dblClickHandler() {

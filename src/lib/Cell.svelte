@@ -62,7 +62,7 @@
 		}
 	}
 
-	function cellClickHandler(ev: MouseEvent) {
+	function cellMouseDownHandler(ev: MouseEvent) {
 		paintCell(ev);
 	}
 
@@ -110,7 +110,7 @@
 			empty: isEmptyCell(cell)
 		}
 	]}
-	onclick={cellClickHandler}
+	onmousedown={cellMouseDownHandler}
 	onmouseover={cellMouseOverHandler}
 	ondragover={dragoverHandler}
 	ondrop={cellDropHandler}
