@@ -4,20 +4,21 @@
 	import GridTools from '$lib/GridTools.svelte';
 	import LevelTools from '$lib/LevelTools.svelte';
 	import CellTools from '$lib/CellTools.svelte';
-	import { setGrid } from '$lib/store/GridStore.svelte';
+	import { getGrid, setGrid } from '$lib/store/GridStore.svelte';
 	import { getTool, setTool } from '$lib/store/ToolStore.svelte';
 	import '../app.css';
-	let { children } = $props();
-
+	import { page } from '$app/stores';
 	import { dev } from '$app/environment';
 	import { RenderScan } from 'svelte-render-scan';
 	import { onMount } from 'svelte';
 	import NewGridDialog from '$lib/NewGridDialog.svelte';
 	import MetaTags from '$lib/MetaTags.svelte';
+	import { goto, replaceState } from '$app/navigation';
 
+	let { children } = $props();
 	setGrid();
 	setTool();
-
+	const grid = getGrid();
 	const tool = getTool();
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -47,6 +48,15 @@
 			window.removeEventListener('keydown', handleKeyDown);
 		};
 	});
+
+	const levelString = $page.url.searchParams.get('lvl');
+
+	if (levelString) {
+		const level = atob(levelString);
+		grid.load(level);
+		$page.url.searchParams.delete('lvl');
+		goto($page.url);
+	}
 </script>
 
 {#if dev && false}
