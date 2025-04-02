@@ -148,6 +148,21 @@ class GridStore {
 		}
 	}
 
+	setEntityDetails(row: number, col: number, color: Color, id: string) {
+		const cell = this.getCell(row, col);
+
+		if (!cell || !canHaveEntity(cell)) {
+			return false;
+		}
+
+		if (!cell.entity) {
+			return false;
+		}
+
+		cell.entity.color = color;
+		cell.entity.id = id;
+	}
+
 	addEntity(row: number, col: number, entity: EntityAgent | EntityBox): boolean {
 		const cell = this.getCell(row, col);
 

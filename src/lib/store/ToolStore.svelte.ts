@@ -11,7 +11,6 @@ class ToolStore {
 	#tool: { current: CellVariant | EntityVariant } = localState(TOOL_KEY, CellVariant.Free);
 	#color: { current: Color } = localState(COLOR_KEY, 'blue');
 
-	isDragging = $state(false);
 	nextAgentId = $state('0');
 	nextBoxId = $state('A');
 	autoIncrementAgent = localState(AUTO_INC_AGENT_KEY, false);
@@ -30,10 +29,6 @@ class ToolStore {
 
 	setColor(color: Color) {
 		this.#color.current = color;
-	}
-
-	setIsDragging(val: boolean) {
-		this.isDragging = val;
 	}
 
 	incrementAgentId() {

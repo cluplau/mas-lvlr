@@ -65,7 +65,7 @@
 	}
 
 	function cellMouseOverHandler(ev: MouseEvent) {
-		if (ev.buttons != 1 || tool.isDragging) {
+		if (ev.buttons != 1) {
 			return;
 		}
 		if (
