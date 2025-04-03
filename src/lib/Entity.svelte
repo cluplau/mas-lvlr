@@ -51,6 +51,7 @@
 {#if canHaveEntity(cell) && cell.entity && isAgentEntity(cell.entity)}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
+		data-entity="true"
 		class="entity agent"
 		style={`--entity-color: ${toCSSColor(cell.entity.color)}`}
 		draggable="true"
@@ -64,6 +65,7 @@
 {:else if canHaveEntity(cell) && cell.entity && isBoxEntity(cell.entity)}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
+		data-entity="true"
 		class="entity box"
 		style={`--entity-color: ${toCSSColor(cell.entity.color)}`}
 		draggable="true"

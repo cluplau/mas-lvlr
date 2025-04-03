@@ -27,7 +27,20 @@
 
 	const tool = getTool();
 
+	let ref: HTMLDivElement | undefined = $state(undefined);
+
 	function paintCell(ev: MouseEvent) {
+		if (!ref || ev.target != ref) {
+			return;
+		}
+
+		if (
+			ev.relatedTarget &&
+			(ev.relatedTarget as HTMLDivElement)?.getAttribute('data-entity') == 'true'
+		) {
+			return;
+		}
+
 		if (isCellVariant(tool.tool)) {
 			if (tool.tool == CellVariant.AgentGoal) {
 				grid.setCell(row, col, tool.tool, tool.nextAgentId);
@@ -100,6 +113,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <div
+	bind:this={ref}
 	class={[
 		'cell',
 		{
@@ -114,11 +128,11 @@
 	ondrop={cellDropHandler}
 >
 	{#if isBoxGoalCell(cell)}
-		<div class="goal entity boxgoal">
+		<div class="goal entity boxgoal" style="pointer-events: none;">
 			{cell.goalFor}
 		</div>
 	{:else if isAgentGoalCell(cell)}
-		<div class="goal entity agentgoal">
+		<div class="goal entity agentgoal" style="pointer-events: none;">
 			{cell.goalFor}
 		</div>
 	{/if}
