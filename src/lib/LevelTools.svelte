@@ -22,16 +22,20 @@
 	}
 
 	function handleFileUpload(event: Event) {
+		console.log(event);
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
 		if (!file) return;
 
 		const reader = new FileReader();
+		reader.readAsText(file);
 		reader.onload = () => {
 			const level = reader.result?.toString() ?? '';
 			store.load(level);
+			if (target) {
+				target.value = '';
+			}
 		};
-		reader.readAsText(file);
 	}
 
 	function downloadGrid() {
